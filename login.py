@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 from PyQt6.QtGui import QPixmap, QFont, QIcon
 from PyQt6.QtCore import Qt, QSize
 
+#from principal import MainWindow
+
 class LoginWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -36,7 +38,7 @@ class LoginWindow(QMainWindow):
         
         logo_label = QLabel()
         # Tener un archivo logo.png en la misma carpeta o especificar la ruta correcta
-        logo_pixmap = QPixmap("Image/logo.png")
+        logo_pixmap = QPixmap("images/logo.png")
         if not logo_pixmap.isNull():
             logo_label.setPixmap(logo_pixmap.scaled(180, 180, Qt.AspectRatioMode.KeepAspectRatio))
         else:
@@ -121,6 +123,8 @@ class LoginWindow(QMainWindow):
     
     def open_main_app(self):
         """Abre la aplicación principal después del login exitoso"""
+        from principal import MainWindow  # Evita import circular
+        
         # Ventana principal
         QMessageBox.information(
             self,
@@ -128,6 +132,13 @@ class LoginWindow(QMainWindow):
             "Bienvenido al sistema Farma PLUS!",
             QMessageBox.StandardButton.Ok
         )
+    
+        # Abrir ventana principal
+        self.main_window = MainWindow()
+        self.main_window.show()
+
+        # Cerrar la ventana de login
+        self.close()
         
         
 
