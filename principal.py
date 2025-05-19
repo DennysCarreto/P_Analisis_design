@@ -1,7 +1,11 @@
 from PyQt6.QtWidgets import (QMainWindow, QLabel, QPushButton, QVBoxLayout, 
-                             QHBoxLayout, QWidget, QGridLayout)
+                             QHBoxLayout, QWidget, QGridLayout, QApplication)
 from PyQt6.QtGui import QFont, QIcon, QPixmap
 from PyQt6.QtCore import Qt, QSize
+import sys
+
+# Importamos el módulo de inventario
+from modules.inventario import InventarioWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -118,14 +122,59 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(grid_layout)
         main_layout.addStretch()
 
+        # Almacena referencias a las ventanas de módulos
+        self.module_windows = {}
+
     def logout(self):
-        from login import LoginWindow  # Importación dentro de la función para evitar el ciclo
         """Cerrar sesión y volver al login"""
+        from login import LoginWindow  # Importación dentro de la función para evitar el ciclo
+        
+        # Cerrar todas las ventanas de módulos abiertas
+        for window_name, window in list(self.module_windows.items()):
+            if window:
+                window.parent_window = None  # Desconectar la referencia al padre
+                window.close()
+                window.deleteLater()  # Programar la destrucción del objeto
+                self.module_windows[window_name] = None
+        
+        # Limpiar diccionario
+        self.module_windows.clear()
+        
+        # Crear y mostrar la ventana de login
         self.login_window = LoginWindow()
         self.login_window.show()
+        
+        # Cerrar la ventana principal
         self.close()
         
-    # abrir cada modulo, hacer lo mismo para el resto de modulos
     def open_module(self, module_name):
         """Abre el módulo seleccionado"""
-        print(f"Abriendo módulo: {module_name}")
+        if module_name == "inventario":
+            from modules.inventario import InventarioWindow
+            self.invwindow = InventarioWindow()
+            self.invwindow.show()
+
+            # Cerrar la ventana de principal
+            self.close()
+            # # Crear la ventana de inventario si no existe
+            # if "inventario" not in self.module_windows:
+            #     self.module_windows["inventario"] = InventarioWindow(self)
+            
+            # # Siempre creamos una nueva instancia para evitar problemas
+            # from modules.inventario import InventarioWindow
+            # self.module_windows["inventario"] = InventarioWindow(self)
+            
+            # # Mostrar la ventana de inventario
+            # self.module_windows["inventario"].show()
+            # self.close()  # Oculta la ventana principal
+
+        else:
+            print(f"Abriendo módulo: {module_name}")
+            
+
+# Solo ejecutar si se llama directamente
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())

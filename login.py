@@ -125,13 +125,13 @@ class LoginWindow(QMainWindow):
         """Abre la aplicación principal después del login exitoso"""
         from principal import MainWindow  # Evita import circular
         
-        # Ventana principal
-        QMessageBox.information(
-            self,
-            "Login exitoso",
-            "Bienvenido al sistema Farma PLUS!",
-            QMessageBox.StandardButton.Ok
-        )
+        # # Ventana principal
+        # QMessageBox.information(
+        #     self,
+        #     "Login exitoso",
+        #     "Bienvenido al sistema Farma PLUS!",
+        #     QMessageBox.StandardButton.Ok
+        # )
     
         # Abrir ventana principal
         self.main_window = MainWindow()
