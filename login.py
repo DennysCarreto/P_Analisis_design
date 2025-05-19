@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                             QLabel, QLineEdit, QPushButton, QMessageBox)
 from PyQt6.QtGui import QPixmap, QFont, QIcon
 from PyQt6.QtCore import Qt, QSize
-
+from principal import MainWindow 
 #from principal import MainWindow
 
 class LoginWindow(QMainWindow):
@@ -123,7 +123,7 @@ class LoginWindow(QMainWindow):
     
     def open_main_app(self):
         """Abre la aplicación principal después del login exitoso"""
-        from principal import MainWindow  
+         
         
         # # Ventana principal
         # QMessageBox.information(
@@ -134,6 +134,7 @@ class LoginWindow(QMainWindow):
         # )
     
         # Abrir ventana principal
+        
         self.main_window = MainWindow()
         self.main_window.show()
 
