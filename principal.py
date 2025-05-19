@@ -3,6 +3,10 @@ from PyQt6.QtWidgets import (QMainWindow, QLabel, QPushButton, QVBoxLayout,
 from PyQt6.QtGui import QFont, QIcon, QPixmap
 from PyQt6.QtCore import Qt, QSize
 
+from modules.proveedores import proveedoresWindow
+from modules.clientes import clientesWindow
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -127,5 +131,15 @@ class MainWindow(QMainWindow):
         
     # abrir cada modulo, hacer lo mismo para el resto de modulos
     def open_module(self, module_name):
-        """Abre el módulo seleccionado"""
-        print(f"Abriendo módulo: {module_name}")
+        if module_name == "ventas":
+            self.ventas_window = VentasWindow()
+            self.ventas_window.show()
+        elif module_name == "clientes":
+            self.clientes_window = clientesWindow()
+            self.clientes_window.show()
+        elif module_name == "inventario":
+            self.inventario_window = InventarioWindow()
+            self.inventario_window.show()
+        elif module_name == "proveedores":
+            self.proveedores_window = proveedoresWindow()
+            self.proveedores_window.show()
