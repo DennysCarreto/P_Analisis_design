@@ -1,11 +1,7 @@
 from PyQt6.QtWidgets import (QMainWindow, QLabel, QPushButton, QVBoxLayout, 
-                             QHBoxLayout, QWidget, QGridLayout)
+                             QHBoxLayout, QWidget, QGridLayout, QApplication)
 from PyQt6.QtGui import QFont, QIcon, QPixmap
 from PyQt6.QtCore import Qt, QSize
-
-from modules.proveedores import proveedoresWindow
-from modules.clientes import clientesWindow
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -122,24 +118,31 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(grid_layout)
         main_layout.addStretch()
 
+        # Almacena referencias a las ventanas de módulos
+        self.module_windows = {}
+
     def logout(self):
-        from login import LoginWindow  # Importación dentro de la función para evitar el ciclo
         """Cerrar sesión y volver al login"""
+        from login import LoginWindow  # Importación dentro de la función para evitar el ciclo
+        
+        # Cerrar todas las ventanas de módulos abiertas
+        for window_name, window in list(self.module_windows.items()):
+            if window:
+                window.parent_window = None  # Desconectar la referencia al padre
+                window.close()
+                window.deleteLater()  # Programar la destrucción del objeto
+                self.module_windows[window_name] = None
+        
+        # Limpiar diccionario
+        self.module_windows.clear()
+        
+        # Crear y mostrar la ventana de login
         self.login_window = LoginWindow()
         self.login_window.show()
+        
+        # Cerrar la ventana principal
         self.close()
         
-    # abrir cada modulo, hacer lo mismo para el resto de modulos
     def open_module(self, module_name):
-        if module_name == "ventas":
-            self.ventas_window = VentasWindow()
-            self.ventas_window.show()
-        elif module_name == "clientes":
-            self.clientes_window = clientesWindow()
-            self.clientes_window.show()
-        elif module_name == "inventario":
-            self.inventario_window = InventarioWindow()
-            self.inventario_window.show()
-        elif module_name == "proveedores":
-            self.proveedores_window = proveedoresWindow()
-            self.proveedores_window.show()
+        """Abre el módulo seleccionado"""
+        print(f"Abriendo módulo: {module_name}")
