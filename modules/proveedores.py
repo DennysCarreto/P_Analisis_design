@@ -2,14 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QLabel, QPushButton, QWidg
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 import mysql.connector
-
-conexion = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="admin",
-    database="farmaplus"
-)
-
+from conexion import ConexionBD
 
 class ProveedoresWindow(QMainWindow):
     def __init__(self):
@@ -156,6 +149,7 @@ class ProveedoresWindow(QMainWindow):
         
     def agregar_cliente(self,nombre, apellido, telefono):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
 
             consulta = """
@@ -179,6 +173,7 @@ class ProveedoresWindow(QMainWindow):
    
     def mostrar_clientes(self):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
 
              #Verificar la conexión antes de ejecutar la consulta
@@ -217,6 +212,7 @@ class ProveedoresWindow(QMainWindow):
     def buscar_cliente(self):
         id = self.search_cliente.text()
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
             # Verificar la conexión antes de ejecutar la consulta
             if not conexion.is_connected():
@@ -242,6 +238,7 @@ class ProveedoresWindow(QMainWindow):
 
     def actualizar_cliente(self, id_cliente, nombre, apellido, telefono):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
 
             consulta = """
@@ -264,6 +261,7 @@ class ProveedoresWindow(QMainWindow):
             print("Cursor cerrado.")
     def eliminar_cliente(self, id_cliente, nombre, apellido, telefono):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
 
             consulta = """

@@ -3,12 +3,7 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 import mysql.connector
 
-conexion = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="admin",
-    database="farmaplus"
-)
+from conexion import ConexionBD
 
 class ClientesWindow(QMainWindow):
     def __init__(self):
@@ -154,8 +149,8 @@ class ClientesWindow(QMainWindow):
         
     def agregar_cliente(self,nombre, apellido, telefono):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
-
             consulta = """
             INSERT INTO cliente (nombre, apellido, telefono,activo) 
             VALUES (%s, %s, %s,1)
@@ -177,8 +172,8 @@ class ClientesWindow(QMainWindow):
    
     def mostrar_clientes(self):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
-
              #Verificar la conexión antes de ejecutar la consulta
             if not conexion.is_connected():
                 print("¡Error! La conexión no está activa.")
@@ -215,6 +210,7 @@ class ClientesWindow(QMainWindow):
     def buscar_cliente(self):
         id = self.search_cliente.text()
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
             # Verificar la conexión antes de ejecutar la consulta
             if not conexion.is_connected():
@@ -240,6 +236,7 @@ class ClientesWindow(QMainWindow):
 
     def actualizar_cliente(self, id_cliente, nombre, apellido, telefono):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
 
             consulta = """
@@ -262,6 +259,7 @@ class ClientesWindow(QMainWindow):
             print("Cursor cerrado.")
     def eliminar_cliente(self, id_cliente, nombre, apellido, telefono):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
 
             consulta = """

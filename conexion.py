@@ -12,7 +12,7 @@ class ConexionBD:
                 ConexionBD._conexion = mysql.connector.connect(
                     host='localhost',
                     user='root',
-                    password='admin',
+                    password='gomez2crak',
                     database='farmaPlus'
                 )
                 print("✅ Conexión establecida.")

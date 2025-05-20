@@ -5,11 +5,13 @@ from PyQt6.QtCore import Qt, QSize
 from modules.proveedores import ProveedoresWindow
 from modules.clientes import ClientesWindow
 from modules.ventas import VentasWindow
-from modules.inventario import InventarioWindow
+from modules.inventario import ProductDialog
+from modules.RegistroUsuario import VentanaRegistro
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self,cargo):
         super().__init__()
+        
 
         # Configuración de la ventana principal
         self.setWindowTitle("Farma PLUS - Principal")
@@ -27,7 +29,26 @@ class MainWindow(QMainWindow):
 
         # Layout superior para el botón de cerrar sesión
         top_layout = QHBoxLayout()
-        top_layout.addStretch()  # poner el botón a la derecha
+    
+        # Botón de registrar usuario (a la izquierda)
+        register_button = QPushButton("Registrar usuario")
+        register_button.setFixedSize(140, 35)
+        register_button.setStyleSheet("""
+            QPushButton {
+                background-color: #5cb85c;
+                color: white;
+                border-radius: 5px;
+                font-size: 13px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #4cae4c;
+            }
+        """)
+        register_button.clicked.connect(self.register_user)  # Método que debes definir
+        top_layout.addWidget(register_button)
+
+        top_layout.addStretch()  # Espacio entre el botón izquierdo y el botón derecho
 
         logout_button = QPushButton("Cerrar sesión")
         logout_button.setFixedSize(120, 35)
@@ -155,14 +176,15 @@ class MainWindow(QMainWindow):
             self.clientes_window = ClientesWindow()
             self.clientes_window.show()
         elif module_name == "inventario":
-            from modules.inventario import InventarioWindow
-            self.invwindow = InventarioWindow()
-            self.invwindow.show()
-            # Cerrar la ventana de principal
-            self.close()
-            
+            self.inventario_window = ProductDialog()
+            self.inventario_window.show()
         elif module_name == "proveedores":
             self.proveedores_window = ProveedoresWindow()
             self.proveedores_window.show()
         """Abre el módulo seleccionado"""
         print(f"Abriendo módulo: {module_name}")
+    def register_user(self):
+        """Abrir ventana para registrar un nuevo usuario"""
+        print("Registrar usuario clicado")
+        self.clientes_window = VentanaRegistro()
+        self.clientes_window.show()
