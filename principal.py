@@ -11,6 +11,8 @@ from modules.RegistroUsuario import VentanaRegistro
 class MainWindow(QMainWindow):
     def __init__(self,cargo):
         super().__init__()
+        self.cargo = cargo
+        
         
 
         # Configuración de la ventana principal
@@ -27,26 +29,26 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(20)
 
-        # Layout superior para el botón de cerrar sesión
+        # Layout superior para el botón de registar Usuario
         top_layout = QHBoxLayout()
-    
-        # Botón de registrar usuario (a la izquierda)
-        register_button = QPushButton("Registrar usuario")
-        register_button.setFixedSize(140, 35)
-        register_button.setStyleSheet("""
-            QPushButton {
-                background-color: #5cb85c;
-                color: white;
-                border-radius: 5px;
-                font-size: 13px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #4cae4c;
-            }
-        """)
-        register_button.clicked.connect(self.register_user)  # Método que debes definir
-        top_layout.addWidget(register_button)
+        if self.cargo == "Gerente":
+            # Botón de registrar usuario (a la izquierda)
+            register_button = QPushButton("Registrar usuario")
+            register_button.setFixedSize(140, 35)
+            register_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #5cb85c;
+                    color: white;
+                    border-radius: 5px;
+                    font-size: 13px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background-color: #4cae4c;
+                }
+            """)
+            register_button.clicked.connect(self.register_user)  # Método que debes definir
+            top_layout.addWidget(register_button)
 
         top_layout.addStretch()  # Espacio entre el botón izquierdo y el botón derecho
 

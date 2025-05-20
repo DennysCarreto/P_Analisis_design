@@ -142,7 +142,7 @@ class LoginWindow(QMainWindow):
 
             if resultado:
                 # Usuario válido, obtener el cargo
-                cargo = resultado["Cargo"]
+                cargo = resultado["cargo"]
 
                 # Abrir la ventana principal con el cargo
                 from principal import MainWindow  # Evita import circular

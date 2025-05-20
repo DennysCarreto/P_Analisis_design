@@ -3,12 +3,7 @@ from PyQt6.QtGui import QPixmap
 import hashlib
 import mysql.connector
 
-conexion = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="gomez2crak",
-    database="FarmaPlus"
-)
+from conexion import ConexionBD
 class VentanaRegistro(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -96,10 +91,11 @@ class VentanaRegistro(QMainWindow):
 
     def agregar_Usuario(self,nombre, apellido, telefono,nombreUsuario,contrasenia,cargo):
         try:
+            conexion = ConexionBD.obtener_conexion()
             cursor = conexion.cursor()
 
             consulta = """
-            INSERT INTO usuarios (nombre, apellido, telefono, usuario,contraseña,cargo,activo) 
+            INSERT INTO usuario (nombre, apellido, telefono, usuario,contraseña,cargo,activo) 
             VALUES (%s, %s, %s, %s,%s,%s,1)
             """
             datos = (nombre, apellido, telefono,nombreUsuario,contrasenia,cargo)
