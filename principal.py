@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt, QSize
 from modules.proveedores import ProveedoresWindow
 from modules.clientes import ClientesWindow
 from modules.ventas import VentasWindow
-from modules.inventario import ProductDialog
+from modules.inventario import InventarioWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -155,8 +155,12 @@ class MainWindow(QMainWindow):
             self.clientes_window = ClientesWindow()
             self.clientes_window.show()
         elif module_name == "inventario":
-            self.inventario_window = ProductDialog()
-            self.inventario_window.show()
+            from modules.inventario import InventarioWindow
+            self.invwindow = InventarioWindow()
+            self.invwindow.show()
+            # Cerrar la ventana de principal
+            self.close()
+            
         elif module_name == "proveedores":
             self.proveedores_window = ProveedoresWindow()
             self.proveedores_window.show()

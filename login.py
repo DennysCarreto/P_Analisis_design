@@ -123,7 +123,7 @@ class LoginWindow(QMainWindow):
     
     def open_main_app(self):
         """Abre la aplicación principal después del login exitoso"""
-         
+        from principal import MainWindow  # Evita import circular
         
         # # Ventana principal
         # QMessageBox.information(
@@ -134,7 +134,6 @@ class LoginWindow(QMainWindow):
         # )
     
         # Abrir ventana principal
-        
         self.main_window = MainWindow()
         self.main_window.show()
 

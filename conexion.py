@@ -37,4 +37,3 @@ class ConexionBD:
 #     else: print("Fallida")
 
 #     ConexionBD.cerrar_conexion()
-    
