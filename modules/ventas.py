@@ -96,6 +96,23 @@ class NuevaVentaDialog(QDialog):
                 self.actualizar_tabla()
                 self.calcular_total()
     
+    def agregar_producto_por_id(self, producto_id, cantidad=1):
+        producto = next((p for p in self.productos_disponibles if p['id'] == producto_id), None)
+        if producto:
+            total = float(producto['precioVenta']) * cantidad
+            
+            self.productos_seleccionados.append({
+                'id': producto_id,
+                'nombre': producto['nombre'],
+                'cantidad': cantidad,
+                'total': total
+            })
+            
+            self.actualizar_tabla()
+            self.calcular_total()
+            return True
+        return False
+    
     def eliminar_producto(self):
         selected = self.productos_table.selectedItems()
         if not selected:
@@ -207,6 +224,20 @@ class VentasWindow(QMainWindow):
         
         main_layout.addLayout(search_layout)
         
+        # Búsqueda rápida de productos
+        self.buscar_producto_layout = QHBoxLayout()
+        
+        self.buscar_producto_input = QLineEdit()
+        self.buscar_producto_input.setPlaceholderText("Código o nombre del producto")
+        self.buscar_producto_btn = QPushButton("Buscar Producto")
+        self.buscar_producto_btn.setStyleSheet("QPushButton { background-color: white; border-radius: 5px; padding: 5px; }")
+        self.buscar_producto_btn.clicked.connect(self.buscar_producto)
+        
+        self.buscar_producto_layout.addWidget(self.buscar_producto_input)
+        self.buscar_producto_layout.addWidget(self.buscar_producto_btn)
+        
+        main_layout.addLayout(self.buscar_producto_layout)
+        
         # Tabla de ventas
         self.ventas_table = QTableWidget()
         self.ventas_table.setColumnCount(5)
@@ -218,6 +249,96 @@ class VentasWindow(QMainWindow):
         main_layout.addWidget(self.ventas_table)
         self.setCentralWidget(central_widget)
         self.cargar_ventas()
+        
+        # Variable para mantener referencia al diálogo de nueva venta
+        self.venta_dialog = None
+    
+    def buscar_producto(self):
+        termino = self.buscar_producto_input.text().strip()
+        if not termino:
+            QMessageBox.warning(self, "Advertencia", "Ingrese un código o nombre de producto")
+            return
+            
+        try:
+            conexion = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="admin",
+                database="farmaplus"
+            )
+            cursor = conexion.cursor(dictionary=True)
+            
+            # Buscar por código o nombre
+            query = """
+            SELECT id, nombre, precioVenta, stockActual 
+            FROM producto 
+            WHERE (codigo = %s OR nombre LIKE %s) AND stockActual > 0
+            LIMIT 1
+            """
+            cursor.execute(query, (termino, f"%{termino}%"))
+            producto = cursor.fetchone()
+            
+            if producto:
+                # Crear un diálogo personalizado
+                dialog = QDialog(self)
+                dialog.setWindowTitle("Producto Encontrado")
+                layout = QVBoxLayout()
+                
+                info_label = QLabel(
+                    f"Nombre: {producto['nombre']}\n"
+                    f"Precio: Q{producto['precioVenta']:.2f}\n"
+                    f"Stock disponible: {producto['stockActual']}"
+                )
+                layout.addWidget(info_label)
+                
+                # Agregar campo para cantidad
+                cantidad_layout = QHBoxLayout()
+                cantidad_label = QLabel("Cantidad:")
+                self.cantidad_producto_input = QLineEdit("1")
+                self.cantidad_producto_input.setValidator(QIntValidator(1, producto['stockActual']))
+                cantidad_layout.addWidget(cantidad_label)
+                cantidad_layout.addWidget(self.cantidad_producto_input)
+                layout.addLayout(cantidad_layout)
+                
+                # Botones
+                buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+                buttons.accepted.connect(lambda: self.agregar_producto_a_venta(producto['id'], int(self.cantidad_producto_input.text())))
+                buttons.rejected.connect(dialog.reject)
+                layout.addWidget(buttons)
+                
+                dialog.setLayout(layout)
+                dialog.exec()
+            else:
+                # Verificar si existe pero no tiene stock
+                query = """
+                SELECT nombre FROM producto 
+                WHERE codigo = %s OR nombre LIKE %s
+                LIMIT 1
+                """
+                cursor.execute(query, (termino, f"%{termino}%"))
+                producto_sin_stock = cursor.fetchone()
+                
+                if producto_sin_stock:
+                    QMessageBox.warning(self, "Producto No Disponible", 
+                                      f"El producto '{producto_sin_stock['nombre']}' existe pero no tiene stock disponible")
+                else:
+                    QMessageBox.warning(self, "Producto No Encontrado", 
+                                      "No se encontró ningún producto con ese código o nombre")
+            
+            cursor.close()
+            conexion.close()
+            
+        except mysql.connector.Error as error:
+            QMessageBox.critical(self, "Error", f"Error al buscar producto: {error}")
+    
+    def agregar_producto_a_venta(self, producto_id, cantidad):
+        if self.venta_dialog:
+            if self.venta_dialog.agregar_producto_por_id(producto_id, cantidad):
+                QMessageBox.information(self, "Éxito", "Producto agregado a la venta")
+            else:
+                QMessageBox.warning(self, "Error", "No se pudo agregar el producto a la venta")
+        else:
+            QMessageBox.warning(self, "Error", "No hay una venta en curso. Abra una nueva venta primero.")
     
     def cargar_ventas(self, filtros=None):
         try:
@@ -322,9 +443,9 @@ class VentasWindow(QMainWindow):
                 QMessageBox.warning(self, "Advertencia", "No hay productos con stock disponible")
                 return
             
-            dialog = NuevaVentaDialog(clientes, productos, self)
-            if dialog.exec() == QDialog.DialogCode.Accepted:
-                venta_data = dialog.get_venta_data()
+            self.venta_dialog = NuevaVentaDialog(clientes, productos, self)
+            if self.venta_dialog.exec() == QDialog.DialogCode.Accepted:
+                venta_data = self.venta_dialog.get_venta_data()
                 
                 if not venta_data['productos']:
                     QMessageBox.warning(self, "Advertencia", "Debe agregar al menos un producto")
@@ -339,7 +460,7 @@ class VentasWindow(QMainWindow):
                 """
                 venta_values = (
                     venta_data['cliente_id'] if venta_data['cliente_id'] != 0 else None,
-                    str(venta_data['total'])  # Convertir a string para tu estructura actual
+                    str(venta_data['total'])
                 )
                 
                 cursor.execute(venta_query, venta_values)
@@ -347,24 +468,21 @@ class VentasWindow(QMainWindow):
                 
                 # Insertar detalles de venta
                 for producto in venta_data['productos']:
-                    
                     detalle_query = """
                     INSERT INTO detalle_venta 
                     (ventas_id, producto_id, cantidad, precio_unitario, subtotal)
                     VALUES (%s, %s, %s, %s, %s)
                     """
-                    for producto in venta_data['productos']:
-                        precio_unitario = float(producto['total']) / producto['cantidad']
-                        subtotal = float(producto['total'])  # Ya lo tienes calculado como producto['total']
-                        
-                        cursor.execute(detalle_query, (
-                            venta_id,
-                            producto['id'],
-                            producto['cantidad'],
-                            precio_unitario,
-                            subtotal
-                        ))
-                
+                    precio_unitario = float(producto['total']) / producto['cantidad']
+                    subtotal = float(producto['total'])
+                    
+                    cursor.execute(detalle_query, (
+                        venta_id,
+                        producto['id'],
+                        producto['cantidad'],
+                        precio_unitario,
+                        subtotal
+                    ))
                     
                     # Actualizar stock
                     update_query = "UPDATE producto SET stockActual = stockActual - %s WHERE id = %s"
@@ -383,6 +501,8 @@ class VentasWindow(QMainWindow):
                 cursor.close()
             if 'conexion' in locals() and conexion.is_connected():
                 conexion.close()
+        finally:
+            self.venta_dialog = None
     
     def go_back_to_main(self):
         if self.parent_window:
